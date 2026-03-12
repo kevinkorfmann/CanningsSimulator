@@ -28,13 +28,30 @@ end;
 
 # Schweinsberg number of offspring
 
+#function schweinsberg_offspring(nb_individuals, alpha, p0)
+#    if p0 == 1
+#        return 0
+#    end
+#
+#    random_uni = rand(Uniform(), nb_individuals)
+#    vals = exp.(1/alpha * log.((1 - p0) ./ random_uni))
+#
+#    total = sum(vals)
+#    int_part = floor(total)
+#    frac_part = total - int_part
+#
+#    return int_part + (rand() < frac_part)
+#end
+
 function schweinsberg_offspring(nb_individuals, alpha, p0)
     if p0 == 1
         return 0
     end
     random_uni = rand(Uniform(), nb_individuals)
-    return nb_offspring = floor(sum(exp.(1/alpha * log.((1-p0)./random_uni))))
+    #return nb_offspring = floor(sum(exp.(1/alpha * log.((1-p0)./random_uni))))
+    return nb_offspring = sum(floor.(exp.(1/alpha * log.((1-p0)./random_uni))))
 end
+
 
 
 function get_schweinsber_param(alpha_x=2,p0_x=0,s=0,optimize_alpha=true)
@@ -62,6 +79,42 @@ function get_schweinsber_param(alpha_x=2,p0_x=0,s=0,optimize_alpha=true)
     end 
     return results
   end
+
+
+"""
+  function get_schweinsber_param(alpha_x=2, p0_x=0, s=0, optimize_alpha=true)
+    results = Dict()
+    doable = true
+
+    if optimize_alpha
+        # simple alpha-rescale
+        alpha_y = alpha_x / (1 + s)
+        p0_y    = p0_x
+        # keep alpha in (1,2]
+        if alpha_y < 1 || alpha_y > 2
+            doable = false
+        end
+
+    else
+        # original p0-rescale branch unchanged
+        alpha_y = alpha_x
+        truс     = ((1 + s)^alpha_x) * (1 - p0_x)
+        p0_y     = 1 - truс
+        if p0_y < 0 || p0_y > 1
+            doable = false
+        end
+    end
+
+    if doable
+        results["alpha_y"] = alpha_y
+        results["p0_y"]    = p0_y
+    end
+
+    return results
+end
+"""
+
+
   
 
 
@@ -135,7 +188,7 @@ function nb_next_generation(
     nb_other_offspring = sample_offspring(sampler)
     
     
-
+    #println("nb_other_offspring ", nb_other_offspring)
     if nb_other_offspring > 100_000_000
         nb_other_offspring = 100_000_000
         println("Bound offspring to 1e8 (nb_other_offspring)", nb_other_offspring);
@@ -152,8 +205,10 @@ function nb_next_generation(
 
 
             #println("0 nb_offspring_total: ", nb_offspring_total," nb_offspring_type_1: ", nb_offspring_type_1," pop_size: ", pop_size, " 1+selection_viability:", 1+selection_viability)
+            odds = max(1e-12, 1 + selection_viability)  # keep odds > 0
+            #surviving_offspring_type_1 = scipy_stats.nchypergeom_wallenius.rvs(nb_offspring_total, nb_offspring_type_1, pop_size, 1+selection_viability)
+            surviving_offspring_type_1 = scipy_stats.nchypergeom_wallenius.rvs(nb_offspring_total, nb_offspring_type_1, pop_size, odds)
 
-            surviving_offspring_type_1 = scipy_stats.nchypergeom_wallenius.rvs(nb_offspring_total, nb_offspring_type_1, pop_size, 1+selection_viability)
 
             #println("1 nb_offspring_total: ", nb_offspring_total," nb_offspring_type_1: ", nb_offspring_type_1," pop_size: ", pop_size, " 1+selection_viability:", 1+selection_viability, " surviving_offspring_type_1:", surviving_offspring_type_1)
         end

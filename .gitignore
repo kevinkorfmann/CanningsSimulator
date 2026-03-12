@@ -1,0 +1,9 @@
+.venv/
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
+
+# Raw simulation CSVs (tracked as zips instead)
+original_data/simulations/
+src/simulations_addendum_v1/
+src/simulations_addendum_v2/

@@ -1,0 +1,25 @@
+[project]
+name = "canningssimulator"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=6.29.5",
+    "ipython",
+    "julia>=0.6.2",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.3",
+    "seaborn>=0.13.2",
+    "tqdm>=4.67.1",
+]
+
+[tool.uv.workspace]
+members = [
+    "src/julia",
+    "scikit-allel",
+    "scikit",
+]
+
+[tool.uv.sources]
+julia = { workspace = true }
